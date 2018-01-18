@@ -12,7 +12,7 @@
     // physical channel. If you don't care about multiple channels, you
     // can set the namespace to an empty string.
     namespace = '/socket';
-    
+
     // Connect to the Socket.IO server.
     // The connection URL has the following format:
     //     http[s]://<domain>:<port>[/<namespace>]
@@ -29,8 +29,8 @@
     // The callback function is invoked whenever the server emits data
     // to the client. The data is then displayed in the "Received"
     // section of the page.
-    socket.on('server_response', function(msg) {
-      $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+    socket.on('server_message', function(msg) {
+      $('#log').append('<br>' + $('<div/>').text('Received message from server.').html());
     });
 
     // Interval function that tests message latency by sending a "ping"
@@ -54,6 +54,10 @@
       for (var i = 0; i < ping_pong_times.length; i++)
       sum += ping_pong_times[i];
       $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
+    });
+
+    socket.on('test', function() {
+      console.log('test message received.')
     });
 
     // Handlers for the different forms in the page.
