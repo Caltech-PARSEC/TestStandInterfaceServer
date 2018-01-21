@@ -3,6 +3,7 @@ from queue import Queue
 from threading import Lock
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, disconnect
+from flask_socketio import emit as sio_emit
 
 from messages import emit, emit_message, ServerMessage
 
@@ -39,12 +40,16 @@ def index():
 def add_to_command_queue(commands):
     global command_id
     global command_queue
+
+    ids = []
+
     for cmd in commands:
         cmd.update({'id': command_id})
+        ids.append(command_id)
         command_queue.put(cmd, block=True)
         command_id += 1
-    message = ServerMessage('Finished adding commands to queue.')
-    emit(message)
+
+    sio_emit('queue_status', {'data': 'added', 'ids': ids})
 
 @socketio.on('remove_from_queue')
 def remove_from_command_queue(command_id):
@@ -61,8 +66,10 @@ def remove_from_command_queue(command_id):
     while len(temp_queue) > 0:
         command_queue.put(temp_queue.pop())
 
-    message = ServerMessage('Removed command from queue.')
-    emit(message)
+    if temp_cmd['id'] == command_id:
+        sio_emit('queue_status', {'data': 'removed', 'ids': [command_id]})
+    else:
+        sio_emit('queue_status', {'data': 'remove failed'})
 
 
 @socketio.on('cl_ping', namespace=namespace)
