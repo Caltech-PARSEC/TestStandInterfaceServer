@@ -1,3 +1,9 @@
+from socketio import emit as sio_emit
+
+def emit(message, namespace):
+    assert(isinstance(message, Message))
+    sio_emit(message.message_type, message.data_map(), namespace=namespace)
+
 def emit_message(socketio, message, namespace):
     assert(isinstance(message, Message))
     socketio.emit(message.message_type, message.data_map(), namespace=namespace)

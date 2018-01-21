@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+from queue import Queue
 from threading import Lock
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit, disconnect
+from flask_socketio import SocketIO, disconnect
 
-from messages import emit_message, ServerMessage
+from messages import emit, emit_message, ServerMessage
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
@@ -15,6 +16,9 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
+
+command_queue = Queue()
+command_id = 0
 
 namespace = '/socket'
 
@@ -31,9 +35,39 @@ def background_thread():
 def index():
     return render_template('index.html', async_mode=socketio.async_mode)
 
-@socketio.on('ping', namespace=namespace)
+@socketio.on('add_to_command_queue')
+def add_to_command_queue(commands):
+    global command_id
+    global command_queue
+    for cmd in commands:
+        cmd.update({'id': command_id})
+        command_queue.put(cmd, block=True)
+        command_id += 1
+    message = ServerMessage('Finished adding commands to queue.')
+    emit(message)
+
+@socketio.on('remove_from_queue')
+def remove_from_command_queue(command_id):
+    global command_queue
+
+    temp_cmd = command_queue.get(block=False)
+    temp_queue = []
+
+    # Remove items until we find the command to remove. Add each command
+    # to our temp queue once we confirm we shouldn't remove it.
+    while temp_cmd['id'] != command_id and not command_queue.empty():
+        temp_queue.append(temp_cmd)
+        temp_cmd = command_queue.get(block=False)
+    while len(temp_queue) > 0:
+        command_queue.put(temp_queue.pop())
+
+    message = ServerMessage('Removed command from queue.')
+    emit(message)
+
+
+@socketio.on('cl_ping', namespace=namespace)
 def ping_pong():
-    emit('pong')
+    emit('sv_pong')
 
 @socketio.on('connect', namespace=namespace)
 def do_connect():
@@ -41,11 +75,14 @@ def do_connect():
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
-    emit('server_response', {'data': 'Connected'})
+
+    message = ServerMessage('Connected!')
+    emit(message)
 
 @socketio.on('disconnect_request', namespace=namespace)
 def disconnect_request():
-    emit('server_response', {'data': 'Disconnected!'})
+    message = ServerMessage('Disocnnected!')
+    emit(message)
     disconnect()
 
 @socketio.on('disconnect', namespace=namespace)

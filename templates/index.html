@@ -40,13 +40,13 @@
     var start_time;
     window.setInterval(function() {
       start_time = (new Date).getTime();
-      socket.emit('ping');
+      socket.emit('cl_ping');
     }, 1000);
 
     // Handler for the "pong" message. When the pong is received, the
     // time from the ping is stored, and the average of the last 30
     // samples is average and displayed.
-    socket.on('pong', function() {
+    socket.on('sv_pong', function() {
       var latency = (new Date).getTime() - start_time;
       ping_pong_times.push(latency);
       ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
