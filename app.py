@@ -6,6 +6,7 @@ from flask_socketio import SocketIO, disconnect
 from flask_socketio import emit as sio_emit
 
 from messages import emit, emit_message, ServerMessage
+import json
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
@@ -22,6 +23,7 @@ command_queue = Queue()
 command_id = 0
 
 namespace = '/socket'
+stop = False
 
 def background_thread():
     """Example of how to send server generated events to clients."""
@@ -101,5 +103,34 @@ def disconnect_request():
 def do_disconnect():
     print('Client disconnected', request.sid)
 
+@socketio.on('parse commands')
+def do_parse(data):
+    global command_queue
+    message = json.loads(data)
+
+    if message['type'] == 'valve_command':
+        #Update the valve weights
+        #TO DO
+        pass
+
+    elif message['type'] == 'wait_ms':
+
+        iterations, remainder = divmod(message['data'], 5)
+        for i in range(iterations):
+            if stop:
+                # close all the valves and flush the command_queue
+                # TO DO: Close all the valves
+                command_queue.queue.clear()
+                return
+
+            thread.sleep(0.005)
+
+        if stop:
+            command_queue.queue.clear()
+            return
+        thread.sleep(remainder*0.001)
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)
+    while (!command_queue.empty()):
+        do_parse(command_queue.get(block=False))
