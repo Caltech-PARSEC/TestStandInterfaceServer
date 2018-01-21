@@ -63,6 +63,11 @@ def remove_from_command_queue(command_id):
     while temp_cmd['id'] != command_id and not command_queue.empty():
         temp_queue.append(temp_cmd)
         temp_cmd = command_queue.get(block=False)
+    # If this is true, then the queue got emptied, so this should be added to
+    # the temp queue.
+    if temp_cmd['id'] != command_id:
+        temp_queue.append(temp_cmd)
+
     while len(temp_queue) > 0:
         command_queue.put(temp_queue.pop())
 
