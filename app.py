@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from queue import Queue
+from queue import PriorityQueue
 from threading import Lock
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, disconnect
@@ -7,6 +7,7 @@ from flask_socketio import emit as sio_emit
 
 from messages import emit, emit_message, ServerMessage
 import json
+import time
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
@@ -19,11 +20,11 @@ socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
 
-command_queue = Queue()
+command_queue = PriorityQueue()
 command_id = 0
 
 namespace = '/socket'
-stop = False
+
 
 def background_thread():
     """Example of how to send server generated events to clients."""
@@ -42,13 +43,16 @@ def index():
 def add_to_command_queue(commands):
     global command_id
     global command_queue
-
     ids = []
-
-    for cmd in commands:
-        cmd.update({'id': command_id})
+    # Parse the json format input into python dictionary
+    dic_commands = do_parse(commands)
+    for cmd in dic_commands:
+        v_cmd = cmd
+        v_cmd.update({'id': command_id})
         ids.append(command_id)
-        command_queue.put(cmd, block=True)
+        # Add to the command_queue with priority determined by the
+        # time to execute
+        command_queue.put(v_cmd['time'], v_cmd, block=True)
         command_id += 1
 
     sio_emit('queue_status', {'data': 'added', 'ids': ids})
@@ -104,31 +108,21 @@ def do_disconnect():
     print('Client disconnected', request.sid)
 
 @socketio.on('parse commands')
-def do_parse(data):
-    global command_queue
-    message = json.loads(data)
-
-    if message['type'] == 'valve_command':
-        #Update the valve weights
-        #TO DO
-        pass
-
-    elif message['type'] == 'wait_ms':
-
-        iterations, remainder = divmod(message['data'], 5)
-        for i in range(iterations):
-            if stop:
-                # close all the valves and flush the command_queue
-                # TO DO: Close all the valves
-                command_queue.queue.clear()
-                return
-
-            thread.sleep(0.005)
-
-        if stop:
-            command_queue.queue.clear()
-            return
-        thread.sleep(remainder*0.001)
+def do_parse(cmds):
+    '''Converts json input into python dictionary format'''
+    message = json.loads(cmds)
+    v_cmds = []
+    for cmd in message:
+        v_cmd = {}
+        # The priority is a number 0, 1, 2 where 0: 'NO_PRIORITY', 1:
+        # 'OVERRIDE_PRIORITY', 2: 'EMERGENCY_OVERRIDE_PRIORITY'
+        v_cmd['priority'] = cmd['priority']
+        # Add the time to the system clock time
+        v_cmd['time'] = cmd['time'] + time.clock()
+        v_cmd['target_pos'] = cmd['target_pos']
+        v_cmd['name'] = cmd['name']
+        v_cmds.append(v_cmd)
+    return v_cmds
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
