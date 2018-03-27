@@ -31,12 +31,11 @@ extern void (*py_input)(PyObject *parser, char *buf, int *result, int max_size);
 
 "if"			{ count(); returntoken(IF); }
 "else"			{ count(); returntoken(ELSE); }
-[a-zA-Z](L|D)*	{ count(); returntoken(IDENTIFIER); }
 "break"			{ count(); returntoken(BREAK); }
 "parallel"		{ count(); returntoken(PARALLEL); }
 "run"			{ count(); returntoken(RUN); }
 "wait"			{ count(); returntoken(WAIT); }
-"wait_until"	{ count(); returntoken(WAIT_UNTIL); }
+"wait_until"		{ count(); returntoken(WAIT_UNTIL); }
 "read"			{ count(); returntoken(READ); }
 "open"			{ count(); returntoken(OPEN); }
 "close"			{ count(); returntoken(CLOSE); }
@@ -48,8 +47,6 @@ extern void (*py_input)(PyObject *parser, char *buf, int *result, int max_size);
 "log"			{ count(); returntoken(LOG); }
 "log_err"		{ count(); returntoken(LOG_ERR); }
 "rel_time"		{ count(); returntoken(REL_TIME); }
-
-
 
 {L}({L}|{D})*		{ count(); returntoken(check_type()); }
 
@@ -64,22 +61,8 @@ L?'(\\.|[^\\'])+'	{ count(); returntoken(NUM_CONST); }
 
 L?\"(\\.|[^\\"])*\"	{ count(); returntoken(STRING_LITERAL); }
 
-"..."			{ count(); returntoken(ELLIPSIS); }
-">>="			{ count(); returntoken(RIGHT_ASSIGN); }
-"<<="			{ count(); returntoken(LEFT_ASSIGN); }
-"+="			{ count(); returntoken(ADD_ASSIGN); }
-"-="			{ count(); returntoken(SUB_ASSIGN); }
-"*="			{ count(); returntoken(MUL_ASSIGN); }
-"/="			{ count(); returntoken(DIV_ASSIGN); }
-"%="			{ count(); returntoken(MOD_ASSIGN); }
-"&="			{ count(); returntoken(AND_ASSIGN); }
-"^="			{ count(); returntoken(XOR_ASSIGN); }
-"|="			{ count(); returntoken(OR_ASSIGN); }
 ">>"			{ count(); returntoken(RIGHT_OP); }
 "<<"			{ count(); returntoken(LEFT_OP); }
-"++"			{ count(); returntoken(INC_OP); }
-"--"			{ count(); returntoken(DEC_OP); }
-"->"			{ count(); returntoken(PTR_OP); }
 "&&"			{ count(); returntoken(BOOL_AND_OP); }
 "||"			{ count(); returntoken(BOOL_OR_OP); }
 "<="			{ count(); returntoken(LE_OP); }
@@ -87,29 +70,24 @@ L?\"(\\.|[^\\"])*\"	{ count(); returntoken(STRING_LITERAL); }
 "=="			{ count(); returntoken(EQ_OP); }
 "!="			{ count(); returntoken(NE_OP); }
 ";"			{ count(); returntoken(SEMICOLON); }
-("{"|"<%")		{ count(); returntoken(LBRACE); }
-("}"|"%>")		{ count(); returntoken(RBRACE); }
+"{"			{ count(); returntoken(LCURLY); }
+"}"			{ count(); returntoken(RCURLY); }
 ","			{ count(); returntoken(COMMA); }
 ":"			{ count(); returntoken(COLON); }
-"="			{ count(); returntoken(ASSIGN); }
 "("			{ count(); returntoken(LPAREN); }
 ")"			{ count(); returntoken(RPAREN); }
-("["|"<:")		{ count(); returntoken(LBRACKET); }
-("]"|":>")		{ count(); returntoken(RBRACKET); }
 "."			{ count(); returntoken(PERIOD); }
 "&"			{ count(); returntoken(AND_OP); }
-"!"			{ count(); returntoken(BANG); }
-"~"			{ count(); returntoken(TILDE); }
+"!"			{ count(); returntoken(NOT); }
 "-"			{ count(); returntoken(MINUS); }
 "+"			{ count(); returntoken(PLUS); }
-"*"			{ count(); returntoken(STAR); }
-"/"			{ count(); returntoken(SLASH); }
-"%"			{ count(); returntoken(PERCENT); }
+"*"			{ count(); returntoken(TIMES); }
+"/"			{ count(); returntoken(DIVIDE); }
+"%"			{ count(); returntoken(MOD); }
 "<"			{ count(); returntoken(LT_OP); }
 ">"			{ count(); returntoken(GT_OP); }
 "^"			{ count(); returntoken(CIRCUMFLEX); }
 "|"			{ count(); returntoken(OR_OP); }
-"?"			{ count(); returntoken(QUESTIONMARK); }
 
 [ \t\v\n\f]		{ count(); }
 .			{ /* ignore bad characters */ }
