@@ -24,7 +24,19 @@
 %token NOT
 %token SEMICOLON
 
-%left PLUS MINUS TIMES DIVIDE
+%left COMMA
+%left BOOL_OR_OP
+%left BOOL_AND_OP
+%left OR_OP
+%left CIRCUMFLEX
+%left AND_OP
+%left EQ_OP NE_OP
+%left LT_OP GT_OP LE_OP GE_OP
+%left LEFT_OP RIGHT_OP
+%left PLUS MINUS
+%left TIMES DIVIDE MOD
+
+
 
 /* WTF is a translation_unit?? */
 %start translation_unit
@@ -40,44 +52,37 @@ translation_unit
 
 
 routine_declaration
-	: ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY routine_body RCURLY
-	| ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY RCURLY
-	| ROUTINE IDENTIFIER LPAREN RPAREN LCURLY routine_body RCURLY
-    | ROUTINE IDENTIFIER LPAREN RPAREN LCURLY RCURLY
-	| ROUTINE MAIN LPAREN valve_list RPAREN LCURLY main_routine_body RCURLY
-	| ROUTINE MAIN LPAREN valve_list RPAREN LCURLY RCURLY
-	| ROUTINE CHECKS LPAREN RPAREN LCURLY emergency_routine_body RCURLY
-	| ROUTINE CHECKS LPAREN RPAREN LCURLY RCURLY
-	| EMERGENCY ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY emergency_routine_body RCURLY
-	| EMERGENCY ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY RCURLY
-	| EMERGENCY ROUTINE IDENTIFIER LPAREN RPAREN LCURLY emergency_routine_body RCURLY
-    | EMERGENCY ROUTINE IDENTIFIER LPAREN RPAREN LCURLY RCURLY
-	;
+    : ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY routine_body RCURLY
+    | ROUTINE MAIN LPAREN valve_list RPAREN LCURLY main_routine_body RCURLY
+    | ROUTINE CHECKS LPAREN RPAREN LCURLY checks_routine_body RCURLY
+    | EMERGENCY ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY emergency_routine_body RCURLY
+    ;
 
 valve_list
-	: VALVE
-	| valve_list COMMA VALVE
-	;
+    : %empty
+    | VALVE
+    | valve_list COMMA VALVE
+    ;
 
-routine_body:
+routine_body
+    : %empty
     | serial_statement routine_body
-    | serial_statement
     ;
 
-main_routine_body:
-    | routine_body
+main_routine_body
+    : routine_body
     ;
 
-emergency_routine_body:
-    | routine_body
+emergency_routine_body
+    : routine_body
     ;
 
-checks_routine_body:
-    | routine_body
+checks_routine_body
+    : routine_body
     ;
 
-serial_statement:
-    | parallel_block
+serial_statement
+    : parallel_block
     | run_statement
     | conditional_block
     | wait_statement
@@ -92,152 +97,144 @@ serial_statement:
 
 /** cond expression, bool expression?**/
 
-expression:
-    | READ VALVE
+expression
+    : READ VALVE
     | READ SENSOR
     | REL_TIME
     | NUM_CONST
     ;
 
-parallel_block:
-    | PARALLEL LCURLY parallel_list RCURLY
-    | PARALLEL LCURLY RCURLY
+parallel_block
+    : PARALLEL LCURLY parallel_list RCURLY
     ;
 
-parallel_list:
-    | run_statement parallel_list
+parallel_list
+    : run_statement parallel_list
     | run_statement
     ;
 
-run_statement:
-    | RUN INDENTIFIER SEMICOLON
+run_statement
+    : RUN IDENTIFIER SEMICOLON
     ;
 
-conditional_block:
-    | if_block
-    | if_block else_series
+conditional_block
+    : IF conditional_expression LCURLY routine_body RCURLY
+    | IF conditional_expression LCURLY routine_body RCURLY ELSE LCURLY routine_body RCURLY
     ;
 
-if_block:
-    | IF conditional_expression LCURLY routine_body RCURLY
-    | IF conditional_expression LCURLY RCURLY
+wait_statement
+    : WAIT NUM_CONST SEMICOLON
     ;
 
-else_series:
-    | ELSE if_block
-    | ELSE if_block else_series
-    | ELSE LCURLY routine_body RCURLY
-    | ELSE LCURLY RCURLY
+wait_until_statement
+    : WAIT_UNTIL conditional_expression SEMICOLON
     ;
 
-wait_statement:
-    | WAIT NUM_CONST SEMICOLON
+open_statement
+    : OPEN VALVE SEMICOLON
     ;
 
-wait_until_statement:
-    | WAIT_UNTIL conditional_expression SEMICOLON
+close_statement
+    : CLOSE VALVE SEMICOLON
     ;
 
-open_statement:
-    | OPEN VALVE SEMICOLON
+log_statement
+    : LOG log_value SEMICOLON
     ;
 
-close_statement:
-    | CLOSE VALVE SEMICOLON
+log_err_statement
+    : LOG_ERR log_value SEMICOLON
     ;
 
-log_statement:
-    | LOG log_value SEMICOLON
-    ;
-
-log_err_statement:
-    | LOG_ERROR log_value SEMICOLON
-    ;
-
-log_value:
-    | STRING_LITERAL
-    | expression
+log_value
+    : STRING_LITERAL
     | conditional_expression
     | log_value PLUS log_value
     ;
 
-break_statement:
-    | BREAK STRING_LITERAL SEMICOLON
+break_statement
+    : BREAK STRING_LITERAL SEMICOLON
     ;
 
-abort_statement:
-    | ABORT SEMICOLON
+abort_statement
+    : ABORT SEMICOLON
     ;
 
 primary_expression
-	: expression
-	| LPAREN conditional_expression RPAREN
-	;
+    : expression
+    | LPAREN conditional_expression RPAREN
+    ;
 
 unary_expression
-	: primary_expression
-	| MINUS primary_expression
-	;
+    : primary_expression
+    | MINUS primary_expression
+    ;
 
 multiplicative_expression
-	: unary_expression
-	| multiplicative_expression TIMES unary_expression
-	| multiplicative_expression DIVIDE unary_expression
-	| multiplicative_expression MOD unary_expression
-	;
-
+    : unary_expression
+    | multiplicative_expression TIMES unary_expression
+    | multiplicative_expression DIVIDE unary_expression
+    | multiplicative_expression MOD unary_expression
+    ;
+/*  So, there appears to be one shift/reduce error related to the
+    interplay between additive_expression and shift_expression.
+    I'm not entirely sure what the issue is, but it likely won't
+    cause an issue. 
+    FIXME
+*/
 additive_expression
-	: multiplicative_expression
-	| additive_expression PLUS multiplicative_expression
-	| additive_expression MINUS multiplicative_expression
-	;
+    : multiplicative_expression
+    | additive_expression PLUS multiplicative_expression
+    | additive_expression MINUS multiplicative_expression
+    ;
 
 shift_expression
-	: additive_expression
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
+    : additive_expression
+    | shift_expression LEFT_OP additive_expression
+    | shift_expression RIGHT_OP additive_expression
 
 
 relational_expression
-	: shift_expression
-	| relational_expression LT_OP shift_expression
-	| relational_expression GT_OP shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
-	;
+    : shift_expression
+    | relational_expression LT_OP shift_expression
+    | relational_expression GT_OP shift_expression
+    | relational_expression LE_OP shift_expression
+    | relational_expression GE_OP shift_expression
+    ;
 
 equality_expression
-	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
-	;
+    : relational_expression
+    | equality_expression EQ_OP relational_expression
+    | equality_expression NE_OP relational_expression
+    ;
 
 and_expression
-	: equality_expression
-	| and_expression AND_OP equality_expression
-	;
+    : equality_expression
+    | and_expression AND_OP equality_expression
+    ;
 
 exclusive_or_expression
-	: and_expression
-	| exclusive_or_expression CIRCUMFLEX and_expression
-	;
+    : and_expression
+    | exclusive_or_expression CIRCUMFLEX and_expression
+    ;
 
 inclusive_or_expression
-	: exclusive_or_expression
-	| inclusive_or_expression OR_OP exclusive_or_expression
-	;
+    : exclusive_or_expression
+    | inclusive_or_expression OR_OP exclusive_or_expression
+    ;
 
 logical_and_expression
-	: inclusive_or_expression
-	| logical_and_expression BOOL_AND_OP inclusive_or_expression
-	;
+    : inclusive_or_expression
+    | logical_and_expression BOOL_AND_OP inclusive_or_expression
+    ;
 
 logical_or_expression
-	: logical_and_expression
-	| logical_or_expression BOOL_OR_OP logical_and_expression
-	;
+    : logical_and_expression
+    | logical_or_expression BOOL_OR_OP logical_and_expression
+    ;
 
 conditional_expression
-	: logical_or_expression
-	;
+    : logical_or_expression
+    | NOT logical_or_expression
+    ;
 %%
