@@ -36,9 +36,6 @@
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
 
-
-
-/* WTF is a translation_unit?? */
 %start translation_unit
 
 
@@ -94,8 +91,6 @@ serial_statement
     | break_statement
     | abort_statement
     ;
-
-/** cond expression, bool expression?**/
 
 expression
     : READ VALVE
@@ -176,12 +171,7 @@ multiplicative_expression
     | multiplicative_expression DIVIDE unary_expression
     | multiplicative_expression MOD unary_expression
     ;
-/*  So, there appears to be one shift/reduce error related to the
-    interplay between additive_expression and shift_expression.
-    I'm not entirely sure what the issue is, but it likely won't
-    cause an issue. 
-    FIXME
-*/
+
 additive_expression
     : multiplicative_expression
     | additive_expression PLUS multiplicative_expression
@@ -192,7 +182,7 @@ shift_expression
     : additive_expression
     | shift_expression LEFT_OP additive_expression
     | shift_expression RIGHT_OP additive_expression
-
+    ;
 
 relational_expression
     : shift_expression
