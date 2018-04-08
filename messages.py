@@ -1,4 +1,4 @@
-from socketio import emit as sio_emit
+from flask_socketio import emit as sio_emit
 
 def emit(message, namespace):
     assert(isinstance(message, Message))
