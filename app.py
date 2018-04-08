@@ -126,5 +126,3 @@ def do_parse(cmds):
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
-    while (!command_queue.empty()):
-        do_parse(command_queue.get(block=False))
