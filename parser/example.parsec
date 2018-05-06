@@ -21,10 +21,56 @@ routine MAIN(ALL_VALVES){
 		run routine_2;
 	}
 	run routine_1;
-	break “first_stopping_point”;
+	break "first_stopping_point";
 	parallel{
 		run routine_2;
 		run routine_3;
 	}
 
+}
+/* routine_1 takes control over valve_1, only it can access it while it is running,
+ * and it cannot access any other valves (must explicitly take control in the routine
+ * declaration)
+ */
+routine routine_1(valve_1) {
+	open valve_1; /* block comments only*/
+wait_until read valve_1 == 5 * 3 + 7;
+	wait_until read valve_1 == 255;
+	wait 5000; /* times in ms */
+	if read sensor_2 > 5{
+		run emergency_1;
+	}
+}
+
+routine routine_2(valve_3, valve_4){
+	if (read valve_3==0 || read sensor_1 >100){
+log "sensor_1 reading: ";
+log read sensor_1;
+	open valve_3;
+	close valve_4;
+	}
+	wait_until (read valve_3 > 250 && read valve_4 <10);
+}
+
+routine routine_3(valve_2, valve_1){
+	if rel_time>10 {
+		open valve_1;
+		open valve_2;
+	}
+	wait_until rel_time>100;
+}
+
+emergency routine emergency_1(ALL_VALVES){
+	if (read valve_1 >250){
+		close valve_1;
+		log_err "valve_1 reading: ";
+		log_err valve_1;
+	}
+	else if (read valve_1 <100) {
+		close valve_2;
+	}
+else{
+		open valve_1;
+	}
+	abort;	/*abort stops the test from continuing*/
 }

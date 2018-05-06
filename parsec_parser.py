@@ -2,31 +2,30 @@ import sys
 sys.path.insert(0, "../..")
 
 
-tokens = (
-    "IDENTIFIER",
-    "NUM_CONST",
-    "STRING_LITERAL",
+reserved = {
+    "if" : "IF",
+    "else" : "ELSE",
+    "parallel" : "PARALLEL",
+    "run" : "RUN",
+    "break" : "BREAK",
+    "wait" : "WAIT",
+    "wait_until" : "WAIT_UNTIL",
+    "read" : "READ",
+    "open" : "OPEN",
+    "close" : "CLOSE",
+    "routine" : "ROUTINE",
+    "emergency" : "EMERGENCY",
+    "abort" : "ABORT",
+    "MAIN" : "MAIN",
+    "CHECKS" : "CHECKS",
+    "log" : "LOG",
+    "log_err" : "LOG_ERR",
+    "rel_time" : "REL_TIME",
+}
+tokens = [
     "VALVE",
     "SENSOR",
     "COMMA",
-    "IF",
-    "ELSE",
-    "PARALLEL",
-    "RUN",
-    "BREAK",
-    "WAIT",
-    "WAIT_UNTIL",
-    "READ",
-    "OPEN",
-    "CLOSE",
-    "ROUTINE",
-    "EMERGENCY",
-    "ABORT",
-    "MAIN",
-    "CHECKS",
-    "LOG",
-    "LOG_ERR",
-    "REL_TIME",
     "LEFT_OP",
     "RIGHT_OP",
     "LPAREN",
@@ -50,8 +49,11 @@ tokens = (
     "GT_OP",
     "GE_OP",
     "NOT",
-    "SEMICOLON"
-)
+    "SEMICOLON",
+    "NUM_CONST",
+    "STRING_LITERAL",
+    "IDENTIFIER"
+] + list(reserved.values())
 
 t_NUM_CONST = (
     r"0[xX][a-fA-F0-9]+|"
@@ -59,27 +61,11 @@ t_NUM_CONST = (
     r"\d+\.\d*|"
     r"\d*\.\d+"
 )
+#t_STRING_LITERAL = '[a-zA-Z_]?\"(\\.|[^\\"])*\"'
+#t_IDENTIFIER = "[a-zA-Z_]([a-zA-Z_]|[0-9])*"
 t_VALVE = "valve"
 t_SENSOR = "sensor"
-t_COMMA = "comma"
-t_IF = "if"
-t_ELSE = "else"
-t_PARALLEL = "parallel"
-t_RUN = "run"
-t_BREAK = "break"
-t_WAIT = "wait"
-t_WAIT_UNTIL = "wait_until"
-t_READ = "read"
-t_OPEN = "open"
-t_CLOSE = "close"
-t_ROUTINE = "routine"
-t_EMERGENCY = "emergency"
-t_ABORT = "abort"
-t_MAIN = "main"
-t_CHECKS = "checks"
-t_LOG = "log"
-t_LOG_ERR = "log_err"
-t_REL_TIME = "rel_time"
+t_COMMA = ","
 t_LEFT_OP = "<<"
 t_RIGHT_OP = ">>"
 t_LPAREN = r"\("
@@ -107,6 +93,17 @@ t_SEMICOLON = ";"
 
 t_ignore = " \t"
 
+def t_comment(t):
+    r'(/\*(.|\n)*?\*/)|(//.*)'
+
+def t_STRING_LITERAL(t):
+    '\"(\\.|[^\\"])*\"'
+    return t
+
+def t_IDENTIFIER(t):
+    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    t.type = reserved.get(t.value,'IDENTIFIER')    # Check for reserved words
+    return t
 
 def t_newline(t):
     r'\n+'
@@ -123,11 +120,11 @@ lex.lex(debug=1)
 
 # Parsing rules
 
-precedence = (
+'''precedence = (
     ('left', '+', '-'),
     ('left', '*', '/'),
     ('right', 'UMINUS'),
-)
+)'''
 
 #parsing below here
 def p_translation_unit(p):
@@ -158,7 +155,7 @@ def p_valve_list(p):
 
 def p_routine_body(p):
     """
-    routine_body    : 
+    routine_body    :
                     | serial_statement routine_body
     """
     print("routine line")
@@ -214,7 +211,7 @@ def p_parallel_block(p):
     print("parallel")
 
 
-def on_parallel_list(self, target, option, names, values):
+def p_parallel_list(p):
     """
     parallel_list   : run_statement parallel_list
                     | run_statement
@@ -304,7 +301,7 @@ def p_primary_expression(p):
     """
     pass
 
-def on_unary_expression(self, target, option, names, values):
+def p_unary_expression(p):
     """
     unary_expression    : primary_expression
                         | MINUS primary_expression
@@ -312,7 +309,7 @@ def on_unary_expression(self, target, option, names, values):
     if len(p)>2:
         print("-",end="")
 
-def on_multiplicative_expression(self, target, option, names, values):
+def p_multiplicative_expression(p):
     """
     multiplicative_expression   : unary_expression
                                 | multiplicative_expression TIMES unary_expression
@@ -334,7 +331,7 @@ def on_multiplicative_expression(self, target, option, names, values):
         print("help me I'm a dumbass multiplicative_expression")
 
 
-def on_additive_expression(self, target, option, names, values):
+def p_additive_expression(p):
     """
     additive_expression : multiplicative_expression
                         | additive_expression PLUS multiplicative_expression
@@ -351,7 +348,7 @@ def on_additive_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass additive_expression")
 
-def on_shift_expression(self, target, option, names, values):
+def p_shift_expression(p):
     """
     shift_expression    : additive_expression
                         | shift_expression LEFT_OP additive_expression
@@ -368,7 +365,7 @@ def on_shift_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass shift_expression")
 
-def on_relational_expression(self, target, option, names, values):
+def p_relational_expression(p):
     """
     relational_expression   : shift_expression
                             | relational_expression LT_OP shift_expression
@@ -393,7 +390,7 @@ def on_relational_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass relational_expression")
 
-def on_equality_expression(self, target, option, names, values):
+def p_equality_expression(p):
     """
     equality_expression : relational_expression
                         | equality_expression EQ_OP relational_expression
@@ -410,7 +407,7 @@ def on_equality_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass equality_expression")
 
-def on_and_expression(self, target, option, names, values):
+def p_and_expression(p):
     """
     and_expression  : equality_expression
                     | and_expression AND_OP equality_expression
@@ -423,7 +420,7 @@ def on_and_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass on_and_expression")
 
-def on_exclusive_or_expression(self, target, option, names, values):
+def p_exclusive_or_expression(p):
     """
     exclusive_or_expression : and_expression
                             | exclusive_or_expression CIRCUMFLEX and_expression
@@ -436,7 +433,7 @@ def on_exclusive_or_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass exclusive_or_expression")
 
-def on_inclusive_or_expression(self, target, option, names, values):
+def p_inclusive_or_expression(p):
     """
     inclusive_or_expression : exclusive_or_expression
                             | inclusive_or_expression OR_OP exclusive_or_expression
@@ -449,7 +446,7 @@ def on_inclusive_or_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass inclusive_or_expression")
 
-def on_logical_and_expression(self, target, option, names, values):
+def p_logical_and_expression(p):
     """
     logical_and_expression  : inclusive_or_expression
                             | logical_and_expression BOOL_AND_OP inclusive_or_expression
@@ -462,7 +459,7 @@ def on_logical_and_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass logical_and_expression")
 
-def on_logical_or_expression(self, target, option, names, values):
+def p_logical_or_expression(p):
     """
     logical_or_expression   : logical_and_expression
                             | logical_or_expression BOOL_OR_OP logical_and_expression
@@ -475,7 +472,7 @@ def on_logical_or_expression(self, target, option, names, values):
     else:
         print("help me I'm a dumbass logical_or_expression")
 
-def on_conditional_expression(self, target, option, names, values):
+def p_conditional_expression(p):
     """
     conditional_expression  : logical_or_expression
                             | NOT logical_or_expression
