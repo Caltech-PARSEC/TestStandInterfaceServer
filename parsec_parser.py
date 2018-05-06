@@ -93,7 +93,7 @@ t_TIMES = r"\*"
 t_DIVIDE = "/"
 t_MOD = "%"
 t_BOOL_OR_OP = "\\|\\|"
-t_BOOL_AND-OP = "\\&\\&"
+t_BOOL_AND_OP = "\\&\\&"
 t_OR_OP = "\\|"
 t_AND_OP = "\\&"
 t_CIRCUMFLEX = "\\^"
@@ -120,7 +120,7 @@ def t_error(t):
 
 # Build the lexer
 import ply.lex as lex
-lex.lex()
+lex.lex(debug=1)
 
 # Parsing rules
 
@@ -356,7 +356,7 @@ def on_multiplicative_expression(self, target, option, names, values):
     elif p[2] == '%':
         p[0] = p[1] % p[3]
         print(p[1] + "%" + p[3])
-    else
+    else:
         print("help me I'm a dumbass multiplicative_expression")
 
 
@@ -375,7 +375,7 @@ def on_additive_expression(self, target, option, names, values):
     elif p[2] == '-':
         p[0] = p[1] - p[3]
         print(p[1] + "-" + p[3])
-    else
+    else:
         print("help me I'm a dumbass additive_expression")
 
 def on_shift_expression(self, target, option, names, values):
@@ -393,7 +393,7 @@ def on_shift_expression(self, target, option, names, values):
     elif p[2] == '>>':
         p[0] = p[1] >> p[3]
         print(p[1] + ">>" + p[3])
-    else
+    else:
         print("help me I'm a dumbass shift_expression")
 
 def on_relational_expression(self, target, option, names, values):
@@ -419,7 +419,7 @@ def on_relational_expression(self, target, option, names, values):
     elif p[2] == '>=':
         p[0] = p[1] >= p[3]
         print(p[1] + ">=" + p[3])
-    else
+    else:
         print("help me I'm a dumbass relational_expression")
 
 def on_equality_expression(self, target, option, names, values):
@@ -437,7 +437,7 @@ def on_equality_expression(self, target, option, names, values):
     elif p[2] == '!=':
         p[0] = p[1] != p[3]
         print(p[1] + "!=" + p[3])
-    else
+    else:
         print("help me I'm a dumbass equality_expression")
 
 def on_and_expression(self, target, option, names, values):
@@ -448,10 +448,10 @@ def on_and_expression(self, target, option, names, values):
     """
     if len(p) == 2:
         p[0] = p[1]
-    elif p[2] == '&&':
-        p[0] = p[1] && p[3]
-        print(p[1] + "&&" + p[3])
-    else
+    elif p[2] == '&':
+        p[0] = p[1] & p[3]
+        print(p[1] + "&" + p[3])
+    else:
         print("help me I'm a dumbass on_and_expression")
 
 def on_exclusive_or_expression(self, target, option, names, values):
@@ -465,7 +465,7 @@ def on_exclusive_or_expression(self, target, option, names, values):
     elif p[2] == '^':
         p[0] = p[1] ^ p[3]
         print(p[1] + "^" + p[3])
-    else
+    else:
         print("help me I'm a dumbass exclusive_or_expression")
 
 def on_inclusive_or_expression(self, target, option, names, values):
@@ -479,7 +479,7 @@ def on_inclusive_or_expression(self, target, option, names, values):
     elif p[2] == '|':
         p[0] = p[1] | p[3]
         print(p[1] + "|" + p[3])
-    else
+    else:
         print("help me I'm a dumbass inclusive_or_expression")
 
 def on_logical_and_expression(self, target, option, names, values):
@@ -490,10 +490,10 @@ def on_logical_and_expression(self, target, option, names, values):
     """
     if len(p) == 2:
         p[0] = p[1]
-    elif p[2] == '|':
-        p[0] = p[1] & p[3]
-        print(p[1] + "&" + p[3])
-    else
+    elif p[2] == '&&':
+        p[0] = p[1] and p[3]
+        print(p[1] + "&&" + p[3])
+    else:
         print("help me I'm a dumbass logical_and_expression")
 
 def on_logical_or_expression(self, target, option, names, values):
@@ -505,9 +505,9 @@ def on_logical_or_expression(self, target, option, names, values):
     if len(p) == 2:
         p[0] = p[1]
     elif p[2] == '||':
-        p[0] = p[1] || p[3]
+        p[0] = p[1] or p[3]
         print(p[1] + "||" + p[3])
-    else
+    else:
         print("help me I'm a dumbass logical_or_expression")
 
 def on_conditional_expression(self, target, option, names, values):
@@ -521,7 +521,7 @@ def on_conditional_expression(self, target, option, names, values):
     elif p[1] == '~':
         p[0] = ~ p[2]
         print("~" + p[2])
-    else
+    else:
         print("help me I'm a dumbass conditional_expression")
 
 
@@ -534,11 +534,5 @@ def p_error(p):
 import ply.yacc as yacc
 yacc.yacc()
 
-while 1:
-    try:
-        s = raw_input('calc > ')
-    except EOFError:
-        break
-    if not s:
-        continue
-    yacc.parse(s)
+if __name__ == "__main__":
+    lex.runmain()
