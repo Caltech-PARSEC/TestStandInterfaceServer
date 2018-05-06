@@ -55,12 +55,6 @@ tokens = [
     "IDENTIFIER"
 ] + list(reserved.values())
 
-t_NUM_CONST = (
-    r"0[xX][a-fA-F0-9]+|"
-    r"\d+|"
-    r"\d+\.\d*|"
-    r"\d*\.\d+"
-)
 #t_STRING_LITERAL = '[a-zA-Z_]?\"(\\.|[^\\"])*\"'
 #t_IDENTIFIER = "[a-zA-Z_]([a-zA-Z_]|[0-9])*"
 t_VALVE = "valve"
@@ -93,11 +87,25 @@ t_SEMICOLON = ";"
 
 t_ignore = " \t"
 
+
+def t_NUM_CONST_hex(t):
+    r"0[xX][a-fA-F0-9]+"
+    t.value = int(t.value, 16)
+    t.type  = "NUM_CONST"
+    return t
+
+def t_NUM_CONST_float(t):
+    r"(\d+)|(\d+\.\d*)|(\d*\.\d+)"
+    t.value = float(t.value)
+    t.type  = "NUM_CONST"
+    return t
+
 def t_comment(t):
     r'(/\*(.|\n)*?\*/)|(//.*)'
 
 def t_STRING_LITERAL(t):
     '\"(\\.|[^\\"])*\"'
+    t.value = t.value[1:-1]
     return t
 
 def t_IDENTIFIER(t):
