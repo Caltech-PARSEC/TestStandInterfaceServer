@@ -1,4 +1,15 @@
-# TestStandInterface
+# TestStandInterfaceServer
+
+## The PARSEC Language
+
+Please check out the [PARSEC Documentation](https://goo.gl/HHzsXD) for example code, definition of key words, and other reference materials.
+
+In this project, we have written a scripting language, dubbed PARSEC, for use in controlling the valves on the Test Stand. Parsed using PLY (Python Lex-Yacc), our language is described by a CFG in Yacc, and instances of the code are tokenized by Lex. 
+
+PARSEC provides support for easy control of valves and reading of sensor values, with a user-friendly API for controlling timing and parallelizing actions.
+
+
+## Milestones
 
 ### Milestone Zero - Server Set up - Before Start of 2nd term
 Set up a basic server on the Beagle Bone, which must be able to:
