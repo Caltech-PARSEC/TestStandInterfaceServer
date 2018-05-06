@@ -1,7 +1,6 @@
 import sys
 sys.path.insert(0, "../..")
 
-import lex
 
 tokens = (
     "IDENTIFIER",
@@ -133,119 +132,106 @@ precedence = (
 #parsing below here
 def p_translation_unit(p):
     """
-    translation_unit
-        : routine_declaration
-        | translation_unit routine_declaration
+    translation_unit    : routine_declaration
+                        | translation_unit routine_declaration
     """
     print('translation_unit')
 
 def p_routine_declaration(p):
     """
-    routine_declaration
-        : ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY routine_body RCURLY
-        | ROUTINE MAIN LPAREN valve_list RPAREN LCURLY main_routine_body RCURLY
-        | ROUTINE CHECKS LPAREN RPAREN LCURLY checks_routine_body RCURLY
-        | EMERGENCY ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY emergency_routine_body RCURLY
+    routine_declaration : ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY routine_body RCURLY
+                        | ROUTINE MAIN LPAREN valve_list RPAREN LCURLY main_routine_body RCURLY
+                        | ROUTINE CHECKS LPAREN RPAREN LCURLY checks_routine_body RCURLY
+                        | EMERGENCY ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY emergency_routine_body RCURLY
     """
     print("routine ", p[1])
     print("valves: ",end="")
 
 def p_valve_list(p):
     """
-    valve_list
-        : %empty
-        | VALVE
-        | valve_list COMMA VALVE
+    valve_list  : %empty
+                | VALVE
+                | valve_list COMMA VALVE
     """
     if len(p)>1:
         print(p[len(p)-1],end=", ")
 
 def p_routine_body(p):
     """
-    routine_body
-        : %empty
-        | serial_statement routine_body
+    routine_body    : %empty
+                    | serial_statement routine_body
     """
     print("routine line")
 
 def p_main_routine_body(p):
     """
-    main_routine_body
-        : routine_body
+    main_routine_body   : routine_body
     """
     print("main")
 
 def p_emergency_routine_body(p):
     """
-    emergency_routine_body
-        : routine_body
+    emergency_routine_body  : routine_body
     """
     print("emergency")
 
 def p_checks_routine_body(p):
     """
-    checks_routine_body
-        : routine_body
+    checks_routine_body : routine_body
     """
     print("checks")
 
 def p_serial_statement(p):
     """
-    serial_statement
-        : parallel_block
-        | run_statement
-        | conditional_block
-        | wait_statement
-        | wait_until_statement
-        | open_statement
-        | close_statement
-        | log_statement
-        | log_err_statement
-        | break_statement
-        | abort_statement
+    serial_statement    : parallel_block
+                        | run_statement
+                        | conditional_block
+                        | wait_statement
+                        | wait_until_statement
+                        | open_statement
+                        | close_statement
+                        | log_statement
+                        | log_err_statement
+                        | break_statement
+                        | abort_statement
     """
     pass
 
 def p_expression(p):
     """
-    expression
-        : READ VALVE
-        | READ SENSOR
-        | REL_TIME
-        | NUM_CONST
+    expression  : READ VALVE
+                | READ SENSOR
+                | REL_TIME
+                | NUM_CONST
     """
     for i in range(1,len(p)):
         print(p[i])
 
 def p_parallel_block(p):
     """
-    parallel_block
-        : PARALLEL LCURLY parallel_list RCURLY
+    parallel_block  : PARALLEL LCURLY parallel_list RCURLY
     """
     print("parallel")
 
 
 def on_parallel_list(self, target, option, names, values):
     """
-    parallel_list
-        : run_statement parallel_list
-        | run_statement
+    parallel_list   : run_statement parallel_list
+                    | run_statement
     """
     pass
 
 def p_run_statement(p):
     """
-    run_statement
-        : RUN IDENTIFIER SEMICOLON
+    run_statement   : RUN IDENTIFIER SEMICOLON
     """
     print(p[1],p[2])
 
 def p_conditional_block(p):
     """
-    conditional_block
-        : IF conditional_expression LCURLY routine_body RCURLY
-        | IF conditional_expression LCURLY routine_body RCURLY ELSE conditional_block
-        | IF conditional_expression LCURLY routine_body RCURLY ELSE LCURLY routine_body RCURLY
+    conditional_block   : IF conditional_expression LCURLY routine_body RCURLY
+                        | IF conditional_expression LCURLY routine_body RCURLY ELSE conditional_block
+                        | IF conditional_expression LCURLY routine_body RCURLY ELSE LCURLY routine_body RCURLY
     """
     if len(p)<=6:
         print("if")
@@ -256,94 +242,82 @@ def p_conditional_block(p):
 
 def p_wait_statement(p):
     """
-    wait_statement
-        : WAIT NUM_CONST SEMICOLON
+    wait_statement  : WAIT NUM_CONST SEMICOLON
     """
     print(p[1]," ",p[2])
 
 def p_wait_until_statement(p):
     """
-    wait_until_statement
-        : WAIT_UNTIL conditional_expression SEMICOLON
+    wait_until_statement    : WAIT_UNTIL conditional_expression SEMICOLON
     """
     print("wait until")
 
 def p_open_statement(p):
     """
-    open_statement
-        : OPEN VALVE SEMICOLON
+    open_statement  : OPEN VALVE SEMICOLON
     """
     print(p[1]," ",p[2])
 
 def p_close_statement(p):
     """
-    close_statement
-        : CLOSE VALVE SEMICOLON
+    close_statement : CLOSE VALVE SEMICOLON
     """
     print(p[1]," ",p[2])
 
 def p_log_statement(p):
     """
-    log_statement
-        : LOG log_value SEMICOLON
+    log_statement   : LOG log_value SEMICOLON
     """
     print("log")
 
 def p_log_err_statement(p):
     """
-    log_err_statement
-        : LOG_ERR log_value SEMICOLON
+    log_err_statement   : LOG_ERR log_value SEMICOLON
     """
     print("log_error")
 
 def p_log_value(p):
     """
-    log_value
-        : STRING_LITERAL
-        | conditional_expression
-        | log_value PLUS log_value
+    log_value   : STRING_LITERAL
+                | conditional_expression
+                | log_value PLUS log_value
     """
     if type(p[1]) is str:
         print(p[1])
 
 def p_break_statement(p):
     """
-    break_statement
-        : BREAK STRING_LITERAL SEMICOLON
+    break_statement : BREAK STRING_LITERAL SEMICOLON
     """
     print(p[1], p[2])
 
 def p_abort_statement(p):
     """
-    abort_statement
-        : ABORT SEMICOLON
+    abort_statement : ABORT SEMICOLON
     """
     print("abort")
 
 def p_primary_expression(p):
     """
-    primary_expression
-        : expression
-        | LPAREN conditional_expression RPAREN
+    primary_expression  : expression
+                        | LPAREN conditional_expression RPAREN
     """
     pass
 
 def on_unary_expression(self, target, option, names, values):
     """
-    unary_expression
-        : primary_expression
-        | MINUS primary_expression
+    unary_expression    : primary_expression
+                        | MINUS primary_expression
     """
     if len(p)>2:
         print("-",end="")
 
 def on_multiplicative_expression(self, target, option, names, values):
     """
-    multiplicative_expression
-        : unary_expression
-        | multiplicative_expression TIMES unary_expression
-        | multiplicative_expression DIVIDE unary_expression
-        | multiplicative_expression MOD unary_expression
+    multiplicative_expression   : unary_expression
+                                | multiplicative_expression TIMES unary_expression
+                                | multiplicative_expression DIVIDE unary_expression
+                                | multiplicative_expression MOD unary_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -362,10 +336,9 @@ def on_multiplicative_expression(self, target, option, names, values):
 
 def on_additive_expression(self, target, option, names, values):
     """
-    additive_expression
-        : multiplicative_expression
-        | additive_expression PLUS multiplicative_expression
-        | additive_expression MINUS multiplicative_expression
+    additive_expression : multiplicative_expression
+                        | additive_expression PLUS multiplicative_expression
+                        | additive_expression MINUS multiplicative_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -380,10 +353,9 @@ def on_additive_expression(self, target, option, names, values):
 
 def on_shift_expression(self, target, option, names, values):
     """
-    shift_expression
-        : additive_expression
-        | shift_expression LEFT_OP additive_expression
-        | shift_expression RIGHT_OP additive_expression
+    shift_expression    : additive_expression
+                        | shift_expression LEFT_OP additive_expression
+                        | shift_expression RIGHT_OP additive_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -398,12 +370,11 @@ def on_shift_expression(self, target, option, names, values):
 
 def on_relational_expression(self, target, option, names, values):
     """
-    relational_expression
-        : shift_expression
-        | relational_expression LT_OP shift_expression
-        | relational_expression GT_OP shift_expression
-        | relational_expression LE_OP shift_expression
-        | relational_expression GE_OP shift_expression
+    relational_expression   : shift_expression
+                            | relational_expression LT_OP shift_expression
+                            | relational_expression GT_OP shift_expression
+                            | relational_expression LE_OP shift_expression
+                            | relational_expression GE_OP shift_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -424,10 +395,9 @@ def on_relational_expression(self, target, option, names, values):
 
 def on_equality_expression(self, target, option, names, values):
     """
-    equality_expression
-        : relational_expression
-        | equality_expression EQ_OP relational_expression
-        | equality_expression NE_OP relational_expression
+    equality_expression : relational_expression
+                        | equality_expression EQ_OP relational_expression
+                        | equality_expression NE_OP relational_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -442,9 +412,8 @@ def on_equality_expression(self, target, option, names, values):
 
 def on_and_expression(self, target, option, names, values):
     """
-    and_expression
-        : equality_expression
-        | and_expression AND_OP equality_expression
+    and_expression  : equality_expression
+                    | and_expression AND_OP equality_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -456,9 +425,8 @@ def on_and_expression(self, target, option, names, values):
 
 def on_exclusive_or_expression(self, target, option, names, values):
     """
-    exclusive_or_expression
-        : and_expression
-        | exclusive_or_expression CIRCUMFLEX and_expression
+    exclusive_or_expression : and_expression
+                            | exclusive_or_expression CIRCUMFLEX and_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -470,9 +438,8 @@ def on_exclusive_or_expression(self, target, option, names, values):
 
 def on_inclusive_or_expression(self, target, option, names, values):
     """
-    inclusive_or_expression
-        : exclusive_or_expression
-        | inclusive_or_expression OR_OP exclusive_or_expression
+    inclusive_or_expression : exclusive_or_expression
+                            | inclusive_or_expression OR_OP exclusive_or_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -484,9 +451,8 @@ def on_inclusive_or_expression(self, target, option, names, values):
 
 def on_logical_and_expression(self, target, option, names, values):
     """
-    logical_and_expression
-        : inclusive_or_expression
-        | logical_and_expression BOOL_AND_OP inclusive_or_expression
+    logical_and_expression  : inclusive_or_expression
+                            | logical_and_expression BOOL_AND_OP inclusive_or_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -498,9 +464,8 @@ def on_logical_and_expression(self, target, option, names, values):
 
 def on_logical_or_expression(self, target, option, names, values):
     """
-    logical_or_expression
-        : logical_and_expression
-        | logical_or_expression BOOL_OR_OP logical_and_expression
+    logical_or_expression   : logical_and_expression
+                            | logical_or_expression BOOL_OR_OP logical_and_expression
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -512,9 +477,8 @@ def on_logical_or_expression(self, target, option, names, values):
 
 def on_conditional_expression(self, target, option, names, values):
     """
-    conditional_expression
-        : logical_or_expression
-        | NOT logical_or_expression
+    conditional_expression  : logical_or_expression
+                            | NOT logical_or_expression
     """
     if len(p) == 2:
         p[0] = p[1]
