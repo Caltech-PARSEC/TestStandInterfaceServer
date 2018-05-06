@@ -149,7 +149,7 @@ def p_routine_declaration(p):
 
 def p_valve_list(p):
     """
-    valve_list  : %empty
+    valve_list  :
                 | VALVE
                 | valve_list COMMA VALVE
     """
@@ -158,7 +158,7 @@ def p_valve_list(p):
 
 def p_routine_body(p):
     """
-    routine_body    : %empty
+    routine_body    : 
                     | serial_statement routine_body
     """
     print("routine line")
