@@ -1,0 +1,30 @@
+routine CHECKS(){/*runs on a loop in parallel with MAIN*/
+	if rel_time<5000{
+		if sensor_1>10{
+			run emergency_routine_1;
+		}
+		if sensor_3<50{
+			run emergency_routine_2;
+		}
+	}
+
+	if rel_time>5000{
+		if sensor_1<50{
+			run emergency_routine_3;
+		}
+	}
+}
+
+routine MAIN(ALL_VALVES){
+	parallel{
+		run routine_1;
+		run routine_2;
+	}
+	run routine_1;
+	break “first_stopping_point”;
+	parallel{
+		run routine_2;
+		run routine_3;
+	}
+
+}

@@ -5,11 +5,11 @@
 
 %token IDENTIFIER NUM_CONST STRING_LITERAL
 
-%token VALVE SENSOR 
+%token VALVE SENSOR
 
 %token COMMA
-%token IF ELSE 
-%token PARALLEL RUN BREAK 
+%token IF ELSE
+%token PARALLEL RUN BREAK
 %token WAIT WAIT_UNTIL
 %token READ OPEN CLOSE
 %token ROUTINE EMERGENCY ABORT
@@ -35,6 +35,8 @@
 %left LEFT_OP RIGHT_OP
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
+
+
 
 %start translation_unit
 
@@ -92,6 +94,7 @@ serial_statement
     | abort_statement
     ;
 
+
 expression
     : READ VALVE
     | READ SENSOR
@@ -114,6 +117,7 @@ run_statement
 
 conditional_block
     : IF conditional_expression LCURLY routine_body RCURLY
+    | IF conditional_expression LCURLY routine_body RCURLY ELSE conditional_block
     | IF conditional_expression LCURLY routine_body RCURLY ELSE LCURLY routine_body RCURLY
     ;
 
