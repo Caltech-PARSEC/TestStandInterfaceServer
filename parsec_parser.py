@@ -1,7 +1,18 @@
 import sys
 sys.path.insert(0, "../..")
 
-
+sensors = {
+    "sensor_1" : 1, #TODO: replace placeholder integers with sensor objects
+    "sensor_2" : 2,
+    "sensor_3" : 3,
+    "sensor_4" : 4
+}
+valves = {
+    "valve_1" : 10, #TODO: replace placeholder integers with valve objects
+    "valve_2" : 20,
+    "valve_3" : 30,
+    "valve_4" : 40
+}
 reserved = {
     "if" : "IF",
     "else" : "ELSE",
@@ -57,8 +68,6 @@ tokens = [
 
 #t_STRING_LITERAL = '[a-zA-Z_]?\"(\\.|[^\\"])*\"'
 #t_IDENTIFIER = "[a-zA-Z_]([a-zA-Z_]|[0-9])*"
-t_VALVE = "valve"
-t_SENSOR = "sensor"
 t_COMMA = ","
 t_LEFT_OP = "<<"
 t_RIGHT_OP = ">>"
@@ -111,6 +120,12 @@ def t_STRING_LITERAL(t):
 def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
     t.type = reserved.get(t.value,'IDENTIFIER')    # Check for reserved words
+    if t.type == 'IDENTIFIER' and t.value in valves:
+        t.type = "VALVE"
+        t.value = valves.get(t.value)
+    if t.type == 'IDENTIFIER' and t.value in sensors:
+        t.type = "SENSOR"
+        t.value = sensors.get(t.value)
     return t
 
 def t_newline(t):
