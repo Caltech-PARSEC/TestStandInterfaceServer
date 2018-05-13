@@ -1,6 +1,15 @@
 import sys
 sys.path.insert(0, "../..")
 
+class Node:
+    def __init__(self,type,children=None,leaf=None):
+         self.type = type
+         if children:
+              self.children = children
+         else:
+              self.children = [ ]
+         self.leaf = leaf
+
 sensors = {
     "sensor_1" : 1, #TODO: replace placeholder integers with sensor objects
     "sensor_2" : 2,
