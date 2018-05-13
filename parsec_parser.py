@@ -516,7 +516,11 @@ def p_error(p):
         print("Syntax error at EOF")
 
 import ply.yacc as yacc
-yacc.yacc()
 
 if __name__ == "__main__":
-    lex.runmain()
+    # lex.runmain()
+    with open(sys.argv[1]) as parsec_file:
+        parser = yacc.yacc(debug=True)
+        lines = parsec_file.readlines()
+        text = "".join(lines)
+        parser.parse(text, debug=True)

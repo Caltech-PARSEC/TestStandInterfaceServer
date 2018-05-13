@@ -44,10 +44,10 @@ wait_until read valve_1 == 5 * 3 + 7;
 
 routine routine_2(valve_3, valve_4){
 	if (read valve_3==0 || read sensor_1 >100){
-log "sensor_1 reading: ";
-log read sensor_1;
-	open valve_3;
-	close valve_4;
+        log "sensor_1 reading: ";
+        log read sensor_1;
+	    open valve_3;
+    	close valve_4;
 	}
 	wait_until (read valve_3 > 250 && read valve_4 <10);
 }
@@ -69,7 +69,7 @@ emergency routine emergency_1(ALL_VALVES){
 	else if (read valve_1 <100) {
 		close valve_2;
 	}
-else{
+    else {
 		open valve_1;
 	}
 	abort;	/*abort stops the test from continuing*/
