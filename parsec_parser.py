@@ -164,6 +164,7 @@ def p_translation_unit(p):
     translation_unit    : routine_declaration
                         | translation_unit routine_declaration
     """
+    p[0] = Node('translation_unit',p[1:])
     print('translation_unit')
 
 def p_routine_declaration(p):
@@ -173,8 +174,19 @@ def p_routine_declaration(p):
                         | ROUTINE CHECKS LPAREN RPAREN LCURLY checks_routine_body RCURLY
                         | EMERGENCY ROUTINE IDENTIFIER LPAREN valve_list RPAREN LCURLY emergency_routine_body RCURLY
     """
-    print("routine ", p[1])
-    print("valves: ",end="")
+    children =[]
+    leaves =[]
+    if p[1].type != "EMERGENCY":
+        leaves.append(p[1])
+        children.append(p[3])
+        children.append(p[6])
+    else:
+        leaves.append(p[2])
+        children.append(p[4])
+        children.append(p[7])
+
+    p[0] = Node('routine_declaration',children,leaves)
+    print("routine_declaration")
 
 def p_valve_list(p):
     """
@@ -182,14 +194,25 @@ def p_valve_list(p):
                 | VALVE
                 | valve_list COMMA VALVE
     """
-    if len(p)>1:
+    if len(p)>2:
         print(p[len(p)-1],end=", ")
+        p[0] = p[1]
+        p[0].leaves.append(p[3])
+    elif len(p)==2:
+        p[0] = Node("valve_list", [],[p[1]])
+    else:
+        p[0] = Node("valve_list")
 
 def p_routine_body(p):
     """
     routine_body    :
                     | serial_statement routine_body
     """
+    if len(p)>1:
+        p[0] = p[1]
+        p[0].children.insert(0,p[1])
+    else:
+        p[0] = Node("routine_body")
     print("routine line")
 
 def p_main_routine_body(p):
