@@ -26,13 +26,17 @@ def index():
 def ping():
     emit('sv_pong')
 
-@socketio.on('event', namespace=namespace)
+@socketio.on('cl_msg', namespace=namespace)
 def event(msg):
-    print('EVENT_HANDLE:', msg)
+    print('Message from Client:', msg)
 
-@socketio.on('broadcast_event', namespace=namespace)
-def broadcast_event(msg):
-    print('BROADCAST_EVENT_HANDLE', msg)
+@socketio.on('valve_seq', namespace=namespace)
+def event(valve_seq):
+    print('Valve Sequence:', valve_seq)
+
+@socketio.on('emergency_stop', namespace=namespace)
+def emergency_stop():
+    print('EMERGENCY STOP REQUESTED!!!')
 
 if __name__ == '__main__':
     socketio.run(app, debug=False)

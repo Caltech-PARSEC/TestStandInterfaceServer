@@ -8,21 +8,17 @@
     <script type="text/javascript" charset="utf-8">
       $(document).ready(function() {
         // Use a "/socket" namespace.
-        // An application can open a connection on multiple namespaces, and
-        // Socket.IO will multiplex all those connections on a single
-        // physical channel. If you don't care about multiple channels, you
-        // can set the namespace to an empty string.
-        namespace = '/socket';
+        const namespace = '/socket';
+        const clientId = `webClient`
+
         // Connect to the Socket.IO server.
-        // The connection URL has the following format:
-        //     http[s]://<domain>:<port>[/<namespace>]
-        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
-        // Event handler for new connections.
-        // The callback function is invoked when a connection with the
-        // server is established.
-        socket.on('connect', function() {
-          socket.emit('msg_event', {data: 'I\'m connected!'});
+        let socket = io.connect(`${location.protocol}//${document.domain}:${location.port}${namespace}`);
+
+        // Event handler for new connections. Invoked on connection to server.
+        socket.on('connect', () => {
+          socket.emit('cl_connect', { clientId });
         });
+
         // Event handler for server sent data.
         // The callback function is invoked whenever the server emits data
         // to the client. The data is then displayed in the "Received"
@@ -30,67 +26,100 @@
         socket.on('server_message', function(msg) {
           $('#log').append('<br>' + $('<div/>').text('Received message from server.').html());
         });
-        // Interval function that tests message latency by sending a "ping"
-        // message. The server then responds with a "pong" message and the
-        // round trip time is measured.
-        var ping_pong_times = [];
-        var start_time;
-        window.setInterval(function() {
+
+        // Code to send a ping to the server every sec.
+        let ping_pong_times = [];
+        let start_time;
+        window.setInterval(() => {
           start_time = (new Date).getTime();
           socket.emit('cl_ping');
         }, 1000);
-        // Handler for the "pong" message. When the pong is received, the
-        // time from the ping is stored, and the average of the last 30
-        // samples is average and displayed.
+
+        // Code to handle the pong message
         socket.on('sv_pong', function() {
-          var latency = (new Date).getTime() - start_time;
+          let latency = (new Date).getTime() - start_time;
           ping_pong_times.push(latency);
           ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
-          var sum = 0;
-          for (var i = 0; i < ping_pong_times.length; i++)
-          sum += ping_pong_times[i];
-          $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
+          let avg = ping_pong_times.reduce((acc, val) => {
+            return acc + (val / ping_pong_times.length);
+          });
+          $('#ping-pong').text(Math.round(10 * avg) / 10);
         });
-        socket.on('test', function() {
-          console.log('test message received.')
-        });
+
         // Handlers for the different forms in the page.
-        // These accept data from the user and send it to the server in a
-        // variety of ways
-        $('form#emit').submit(function(event) {
-          socket.emit('event', {data: $('#emit_data').val()});
+        $('form#message').submit((event) => {
+          socket.emit('cl_msg', { data: $('#message_data').val() });
           return false;
         });
-        $('form#broadcast').submit(function(event) {
-          socket.emit('broadcast_event', {data: $('#broadcast_data').val()});
+
+        $('form#valve_sequence').submit((event) => {
+          socket.emit('valve_seq', { valve_seq: JSON.parse($('#valve_sequence_data').val()) });
           return false;
         });
-        $('form#disconnect').submit(function(event) {
+
+        $('form#emergency_stop').submit((event) => {
+          socket.emit('emergency_stop');
+          return false;
+        });
+
+        $('form#disconnect').submit((event) => {
           socket.emit('disconnect_request');
           return false;
         });
       });
     </script>
+
+    <style>
+      form {
+        display: inline-block;
+        border-bottom: 1px solid #CCC;
+        margin-bottom: 8px;
+        padding: 0 8px 8px;
+      }
+
+      input[type=text], label {
+        width: 300px;
+        display: inline-block;
+      }
+
+      input[type=submit] {
+        width: 100px;
+        padding: 0 5px;
+      }
+    </style>
   </head>
   <body>
     <h1>PARSEC</h1>
-    <p>
-      This is the default template for this project. Update it as necessary.
-    </p>
     <p>Async mode is: <b>{{ async_mode }}</b></p>
     <p>Average ping/pong latency: <b><span id="ping-pong"></span>ms</b></p>
+
     <h2>Send:</h2>
-    <form id="emit" method="POST" action='#'>
-      <input type="text" name="emit_data" id="emit_data" placeholder="Message">
-      <input type="submit" value="Echo">
+    <form id="message" method="POST" action='#'>
+      <input type="text" name="message_data" id="message_data" placeholder="Message" />
+      <input type="submit" value="Message" />
     </form>
-    <form id="broadcast" method="POST" action='#'>
-      <input type="text" name="broadcast_data" id="broadcast_data" placeholder="Message">
-      <input type="submit" value="Broadcast">
+
+    <br />
+
+    <form id="valve_sequence" method="POST" action='#'>
+      <input type="text" name="valve_sequence_data" id="valve_sequence_data" placeholder="Valve Sequence" />
+      <input type="submit" value="Send" />
     </form>
+
+    <br />
+
+    <form id="emergency_stop" method="POST" action='#'>
+      <label>Emergency Stop:</label>
+      <input type="submit" value="STOP" />
+    </form>
+
+    <br />
+
     <form id="disconnect" method="POST" action="#">
-      <input type="submit" value="Disconnect">
+      <label>Server Disconnect:</label>
+      <input type="submit" value="Disconnect" />
     </form>
+
     <h2>Receive:</h2>
     <div id="log"></div>
   </body>
