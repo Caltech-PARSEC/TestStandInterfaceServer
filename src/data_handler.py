@@ -32,7 +32,7 @@ class PressureSensor(Sensor):
 class TempSensor(Sensor):
 
     def _rawToRealValue(rawValue):
-        pass
+        pass #bin dec conversion
 
 class ForceSensor(Sensor):
 
@@ -70,10 +70,23 @@ class Valve:
 class SensorManager:
 
     def __init__(self, ):
-        sensors = {}
 
-        for s in sensorEnum:
-            sensors = {}
+        _sensors = {}
+        _sensorsByBoard = {1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        _sensorsByID = {}
+
+        _sensors[SensorEnum.PRESSURE_1] = PressureSensor(1, 1, "Pressure Sensor 1")
+        _sensorsByBoard[1].append( _sensors[SensorEnum.PRESSURE_1] )
+        _sensorsByID[ (1, 1) ] = _sensors[SensorEnum.PRESSURE_1]
+
+        _sensors[SensorEnum.TEMPERATURE_1] = TemperatureSensor(1, 2, "Temperature Sensor 1")
+        _sensorsByBoard[2].append( _sensors[SensorEnum.TEMPERATURE_1] )
+        _sensorsByID[ (1, 2) ] = _sensors[SensorEnum.TEMPERATURE_1]
+
+        _sensors[SensorEnum.FORCE_1] = ForceSensor(1, 3, "Force Sensor 1")
+        _sensorsByBoard[3].append( _sensors[SensorEnum.FORCE_1] )
+        _sensorsByID[ (1, 3) ] = _sensors[SensorEnum.FORCE_1]
+
 
 ###sensors: sensorenum to sens
 ###sensors by board: int to list[sens]
@@ -103,13 +116,18 @@ class SensorManager:
     #    TEMPERATURE_10 = auto()
         FORCE_1 = auto()
 
+
+    def getSensor( sensorType ):
+        return _sensors[sensorType]
+
     def getSensorByID(sensorID, boardID):
-        return _sensorsByBoard[(sensorID, boardID)]
+        return _sensorsByID[(sensorID, boardID)]
 
     def getAllSensors():
         ret = []
-        for s in SensorEnum:
-            ret.append
+        for key in _sensors:
+            ret.append( _sensors[key] )
+        return ret
 
 
 class ValveManager:
