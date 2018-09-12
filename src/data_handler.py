@@ -1,5 +1,5 @@
 #import BoardInterface
-#
+
 from enum import Enum
 
 class Sensor():
@@ -11,17 +11,22 @@ class Sensor():
         self.name = name
 
     def getSensorValue():
-        return lastValue
+        return _lastValue
 
     def setSensorValue(sensorVal):
-        lastValue = sensorVal
+        _lastValue = sensorVal
 
     def getName():
         return name
 
-    @abstractmethod
     def _rawToRealValue(rawValue):
         pass
+
+    def getSensorID():
+        return sensorID
+
+    def getBoardID():
+        return boardID
 
 class PressureSensor(Sensor):
 
@@ -66,15 +71,27 @@ class Valve:
     def getName():
         return name
 
+    def getBoardID():
+        return boardID
+
+    def getValveID():
+        return _valveID
+
 
 class SensorManager:
 
-    def __init__(self, ):
+    def __init__(self):
 
         _sensors = {}
         _sensorsByBoard = {1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
         _sensorsByID = {}
 
+
+        addSensor(SensorEnum.PRESSURE_1, PressureSensor( 1, 1, "Pressure Sensor 1"))
+        addSensor(SensorEnum.TEMPERATURE_1, TemperatureSensor( 1, 2, "Temperature Sensor 1"))
+        addSensor(SensorEnum.FORCE_1, ForceSensor( 1, 3, "Force Sensor 1"))
+
+        """
         _sensors[SensorEnum.PRESSURE_1] = PressureSensor(1, 1, "Pressure Sensor 1")
         _sensorsByBoard[1].append( _sensors[SensorEnum.PRESSURE_1] )
         _sensorsByID[ (1, 1) ] = _sensors[SensorEnum.PRESSURE_1]
@@ -87,34 +104,20 @@ class SensorManager:
         _sensorsByBoard[3].append( _sensors[SensorEnum.FORCE_1] )
         _sensorsByID[ (1, 3) ] = _sensors[SensorEnum.FORCE_1]
 
+        """
 
-###sensors: sensorenum to sens
-###sensors by board: int to list[sens]
-###sensors by ID: (int,int) to sens
+        def addSensor(sEnum, sObject):
+            _sensors[sEnum] = sObject
+            _sensorsByBoard[sObject.getBoardID()].append(sObject)
+            _sensorsByID[ (sObject.getSensorID(), sObject.getBoardID()) ] = sObject
 
 
     class SensorEnum(Enum):
-        PRESSURE_1 = auto()
-    #    PRESSURE_2 = auto()
-    #    PRESSURE_3 = auto()
-    #    PRESSURE_4 = auto()
-    #    PRESSURE_5 = auto()
-    #    PRESSURE_6 = auto()
-    #    PRESSURE_7 = auto()
-    #    PRESSURE_8 = auto()
-    #    PRESSURE_9 = auto()
-    #    PRESSURE_10 = auto()
-        TEMPERATURE_1 = auto()
-    #    TEMPERATURE_2 = auto()
-    #    TEMPERATURE_3 = auto()
-    #    TEMPERATURE_4 = auto()
-    #    TEMPERATURE_5 = auto()
-    #    TEMPERATURE_6 = auto()
-    #    TEMPERATURE_7 = auto()
-    #    TEMPERATURE_8 = auto()
-    #    TEMPERATURE_9 = auto()
-    #    TEMPERATURE_10 = auto()
-        FORCE_1 = auto()
+        PRESSURE_1 = 1
+
+        TEMPERATURE_1 = 2
+
+        FORCE_1 = 3
 
 
     def getSensor( sensorType ):
@@ -131,10 +134,27 @@ class SensorManager:
 
 
 class ValveManager:
+
     def __init__(self):
 
-###valveEnum to valve
-###int to list[valve]
-###getvalve enum to valve
-###getallvalves: list[valve]
-    class ValveEnum(Enum):
+        _valves = {}
+        _valvesByBoard = {1 : [], 2 : [], 3 :[], 4 : [], 5 : []}
+        _valvesByID = {}
+
+
+    def addValve(vEnum, vObject):
+        _valves[vEnum] = vObject
+        _valvesByBoard[vObject.getBoardID()].append(vObject)
+        _valvesByID[ (vObject.getValveID(), vObject.getBoardID())] = vObject
+
+    def getValve(vEnum):
+        return _valves[vEnum]
+
+    def getValveByID(valveID, boardID):
+        return _valvesByID[ (valveID, boardID) ]
+
+    def getAllValves():
+        ret = []
+        for v in _valves:
+            ret.append( _valves[v] )
+        return ret
