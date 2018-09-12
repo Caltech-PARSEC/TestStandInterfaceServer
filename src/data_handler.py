@@ -30,14 +30,16 @@ class Sensor():
 
 class PressureSensor(Sensor):
 
-    def _rawToRealValue(rawValue):          #take in as hex value.
-        data = int(rawValue, 16)
-        return data * (1500 / 4095)         #Maps from (0x000,0xFFF) to (0,1500) psi
+    def _rawToRealValue(rawValue):          #take in as an int value between 0 and 0xFFF
+        return rawValue * (1500 / 4095)         #Maps from (0x000,0xFFF) to (0,1500) psi
 
 class TempSensor(Sensor):
 
     def _rawToRealValue(rawValue):
-        pass #bin dec conversion
+        integer = int(rawValue >> 5)
+        decimal = float(int(rawValue % (2**6))) / 32.0
+        return float(integer) + decimal
+
 
 class ForceSensor(Sensor):
 
@@ -158,3 +160,8 @@ class ValveManager:
         for v in _valves:
             ret.append( _valves[v] )
         return ret
+
+
+def __main__():
+    test = TemperatureSensor(1, 1, test)
+    test._rawToRealValue(input("Enter bin \n"))
