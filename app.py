@@ -23,10 +23,14 @@ valve_manager = None
 sensor_manager = None
 
 def client_tester():
+    i = 0
     while True:
         # TODO: Add better client test
         # Code to test Client
         send_log_data('Hello World!')
+        socketio.emit('sensor_data', {'name': 'sensor1',
+                                      'value': i})
+        i += 1
         socketio.sleep(1);
 
 @socketio.on('connect')
