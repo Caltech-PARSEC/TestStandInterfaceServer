@@ -3,12 +3,14 @@ from threading import Lock
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, disconnect
 from flask_socketio import emit
+import time
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
 async_mode = None
 
+# App setup
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 app.logger.disabled = True
@@ -17,6 +19,9 @@ thread = None
 thread_lock = Lock()
 
 namespace = '/socket'
+
+# Other setup
+start_time = time.time()
 
 # TODO: Valve & Sensor Managers
 valve_manager = None
@@ -28,8 +33,12 @@ def client_tester():
         # TODO: Add better client test
         # Code to test Client
         send_log_data('Hello World!')
-        socketio.emit('sensor_data', {'name': 'sensor1',
+        socketio.emit('sensor_data', {'time': time.time() - start_time,
+                                      'name': 'sensor1',
                                       'value': i})
+        socketio.emit('sensor_data', {'time': time.time() - start_time,
+                                      'name': 'sensor2',
+                                      'value': i + 1})
         i += 1
         socketio.sleep(1);
 
@@ -75,16 +84,22 @@ def set_sensor(data):
 @socketio.on('emergency_stop', namespace=namespace)
 def emergency_stop():
     print('EMERGENCY STOP REQUESTED!!!')
+    print('BUT IT IS NOT YET IMPLEMENTED')
 
 ###################
 # Message Pushing #
 ###################
+
+# TODO: replace the datetime.now() call with the time the
+# sensor reading was obtained.
 def send_sensor_data(sensor):
-    socketio.emit('sensor_data', {'name': sensor.get_name(),
+    socketio.emit('sensor_data', {'time': time.time() - start_time,
+                                  'name': sensor.get_name(),
                                   'value': sensor.get_sensor_value()})
 
 def send_valve_data(valve):
-    socketio.emit('valve_data', {'name': valve.get_name(),
+    socketio.emit('valve_data', {'time': time.time() - start_time,
+                                 'name': valve.get_name(),
                                  'angle': valve.last_value})
 
 def send_log_data(message):
