@@ -70,8 +70,10 @@ def valve_seq(valve_seq):
 
 @socketio.on('set_valve')
 def set_valve(data):
+    print("name:", data['name'], "should_open:", data['should_open'])
+    return
     valve = valve_manager.get_valve(data['name'])
-    if data['angle'] == valve.open_angle:
+    if data['should_open']:
         valve.open()
     else:
         valve.close()
@@ -97,6 +99,7 @@ def send_sensor_data(sensor):
                                   'name': sensor.get_name(),
                                   'value': sensor.get_sensor_value()})
 
+# TODO: refactor angle component
 def send_valve_data(valve):
     socketio.emit('valve_data', {'time': time.time() - start_time,
                                  'name': valve.get_name(),
