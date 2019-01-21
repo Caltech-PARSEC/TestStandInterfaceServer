@@ -23,9 +23,8 @@ namespace = '/socket'
 # Other setup
 start_time = time.time()
 
-# TODO: Valve & Sensor Managers
-valve_manager = None
-sensor_manager = None
+valve_manager = ValveManager()
+sensor_manager = SensorManager()
 
 def client_tester():
     i = 0
@@ -33,6 +32,7 @@ def client_tester():
         # TODO: Add better client test
         # Code to test Client
         send_log_data('Hello World!')
+        send_sensor_data(
         socketio.emit('sensor_data', {'time': time.time() - start_time,
                                       'name': 'sensor1',
                                       'value': i})
@@ -70,8 +70,8 @@ def valve_seq(valve_seq):
 
 @socketio.on('set_valve')
 def set_valve(data):
-    print("name:", data['name'], "should_open:", data['should_open'])
-    return
+    # print("name:", data['name'], "should_open:", data['should_open'])
+    # return
     valve = valve_manager.get_valve(data['name'])
     if data['should_open']:
         valve.open()
@@ -80,7 +80,7 @@ def set_valve(data):
 
 @socketio.on('set_sensor')
 def set_sensor(data):
-    sensor = sensor_manager.get_sensor(data['name'])
+    sensor = sensor_manager.getSensorByName(data['name'])
     sensor.set_sensor_value(data['value'])
 
 @socketio.on('emergency_stop', namespace=namespace)

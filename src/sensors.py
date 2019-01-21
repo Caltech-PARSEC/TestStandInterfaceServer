@@ -85,16 +85,18 @@ class SensorManager:
         # Maps a tuple (sensor ID, board ID) to the corresponding sensor object.
         _sensorsByID = {}
 
+        # Maps a string representation of the sensor to the corresponding sensor object.
+        _sensorsByName = {}
+
         addSensor(SensorEnum.PRESSURE_1, PressureSensor( 1, 1, "Pressure Sensor 1"))
         addSensor(SensorEnum.TEMPERATURE_1, TemperatureSensor( 1, 2, "Temperature Sensor 1"))
         addSensor(SensorEnum.FORCE_1, ForceSensor( 1, 3, "Force Sensor 1"))
 
         def addSensor(self, sEnum, sObject):
-            """
             _sensors[sEnum] = sObject
             _sensorsByBoard[sObject.getBoardID()].append(sObject)
             _sensorsByID[ (sObject.getSensorID(), sObject.getBoardID()) ] = sObject
-            """
+            _sensorsByName[sObject.getName()] = sObject
 
 
     class SensorEnum(Enum):
@@ -114,6 +116,9 @@ class SensorManager:
 
     def getSensorByID(self, sensorID, boardID):
         return _sensorsByID[(sensorID, boardID)]
+
+    def getSensorByName(self, name):
+        return _sensorsByName[name]
 
     def getAllSensors(self):
         return _sensors.values()
