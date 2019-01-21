@@ -1,6 +1,7 @@
 #import BoardInterface
 
 from enum import Enum
+from boardinterface import BoardInterface
 
 class ValveEnum(Enum):
     """
