@@ -16,37 +16,37 @@ class Sensor():
         self._lastValue = 0.0
         self.name = name
 
-    def getSensorValue(self):
-        return _lastValue
+    def get_sensor_value(self):
+        return self._lastValue
 
-    def setSensorValue( self, sensorVal ):
-        _lastValue = sensorVal
+    def set_sensor_value( self, sensorVal ):
+        self._lastValue = sensorVal
 
-    def getName(self):
-        return name
+    def get_name(self):
+        return self.name
 
-    def _rawToRealValue(self, rawValue):
+    def _raw_to_real_value(self, rawValue):
         pass
 
-    def getSensorID(self):
-        return sensorID
+    def get_sensor_id(self):
+        return self.sensorID
 
-    def getBoardID(self):
-        return boardID
+    def get_board_id(self):
+        return self.boardID
 
 
 class PressureSensor(Sensor):
 
-    def _rawToRealValue(self, rawValue):
+    def _raw_to_real_value(self, rawValue):
         """
         Takes in an integer value from 0 and 0xFFF, returns
         an integer reading between 0 and 1500 psi
         """
         return rawValue * (1500 / 4095)
 
-class TempSensor(Sensor):
+class TemperatureSensor(Sensor):
 
-    def _rawToRealValue(self, rawValue):
+    def _raw_to_real_value(self, rawValue):
         """
         Temperature sensor reading comes in as a 16 bit value:
         11 bits for integer part, 5 bits for decimal part.
@@ -63,9 +63,17 @@ class TempSensor(Sensor):
 
 class ForceSensor(Sensor):
 
-    def _rawToRealValue(self, rawValue):
+    def _raw_to_real_value(self, rawValue):
         pass
 
+
+class SensorEnum(Enum):
+    """
+    Embedded enumerator class to keep a descriptive label for every sensor on the test stand.
+    """
+    PRESSURE_1 = 1
+    TEMPERATURE_1 = 2
+    FORCE_1 = 3
 
 class SensorManager:
     """
@@ -77,48 +85,36 @@ class SensorManager:
     def __init__(self):
 
         # Dictionary mapping descriptive labels from the SensorEnum class to the corresponding sensor objects.
-        _sensors = {}
+        self._sensors = {}
 
         # Maps each board ID (1 thru 5) to a list of all the sensors on the corresponding board.
-        _sensorsByBoard = {1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
+        self._sensorsByBoard = {1 : [], 2 : [], 3 : [], 4 : [], 5 : [] }
 
         # Maps a tuple (sensor ID, board ID) to the corresponding sensor object.
-        _sensorsByID = {}
+        self._sensorsByID = {}
 
         # Maps a string representation of the sensor to the corresponding sensor object.
-        _sensorsByName = {}
+        self._sensorsByName = {}
 
-        addSensor(SensorEnum.PRESSURE_1, PressureSensor( 1, 1, "Pressure Sensor 1"))
-        addSensor(SensorEnum.TEMPERATURE_1, TemperatureSensor( 1, 2, "Temperature Sensor 1"))
-        addSensor(SensorEnum.FORCE_1, ForceSensor( 1, 3, "Force Sensor 1"))
+        add_sensor(SensorEnum.PRESSURE_1, PressureSensor( 1, 1, "Pressure Sensor 1"))
+        add_sensor(SensorEnum.TEMPERATURE_1, TemperatureSensor( 1, 2, "Temperature Sensor 1"))
+        add_sensor(SensorEnum.FORCE_1, ForceSensor( 1, 3, "Force Sensor 1"))
 
-        def addSensor(self, sEnum, sObject):
-            _sensors[sEnum] = sObject
-            _sensorsByBoard[sObject.getBoardID()].append(sObject)
-            _sensorsByID[ (sObject.getSensorID(), sObject.getBoardID()) ] = sObject
-            _sensorsByName[sObject.getName()] = sObject
-
-
-    class SensorEnum(Enum):
-        """
-        Embedded enumerator class to keep a descriptive label for every sensor on the test stand.
-        """
-
-        PRESSURE_1 = 1
-
-        TEMPERATURE_1 = 2
-
-        FORCE_1 = 3
+        def add_sensor(self, sEnum, sObject):
+            self._sensors[sEnum] = sObject
+            self._sensorsByBoard[sObject.get_board_id()].append(sObject)
+            self._sensorsByID[ (sObject.get_sensor_id(), sObject.get_board_id()) ] = sObject
+            self._sensorsByName[sObject.get_name()] = sObject
 
 
-    def getSensor(self, sensorType):
-        return _sensors[sensorType]
+    def get_sensor(self, sensorType):
+        return self._sensors[sensorType]
 
-    def getSensorByID(self, sensorID, boardID):
-        return _sensorsByID[(sensorID, boardID)]
+    def get_sensor_by_id(self, sensorID, boardID):
+        return self._sensorsByID[(sensorID, boardID)]
 
-    def getSensorByName(self, name):
-        return _sensorsByName[name]
+    def get_sensor_by_name(self, name):
+        return self._sensorsByName[name]
 
-    def getAllSensors(self):
-        return _sensors.values()
+    def get_all_sensors(self):
+        return self._sensors.values()

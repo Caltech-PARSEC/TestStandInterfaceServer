@@ -2,6 +2,11 @@
 
 from enum import Enum
 
+class ValveEnum(Enum):
+    """
+    Embedded enumerator class to keep a descriptive label for every valve on the test standself.
+    """
+    DEFAULT_VALVE = 1
 
 class Valve:
     """
@@ -9,7 +14,7 @@ class Valve:
     to the BoardInterface code to implement the open() and close() methods.
     """
 
-    def __init__(self, valveID, boardID, closedAngle, openAngle, name):
+    def __init__(self, valveID, boardID, closeAngle, openAngle, name):
         self._valveID = valveID
         self.boardID = boardID
         self._closeAngle = closeAngle
@@ -23,30 +28,28 @@ class Valve:
         NOTE: returns false even when there is no last value.
         """
 
-        if (_lastValue == _openAngle):
+        if (self._lastValue == self._openAngle):
             return True
 
         else:
             return False
 
     def open(self):
-        BoardInterface.writeValve(boardID, valveID, openAngle)
-        _lastValue = openAngle
+        BoardInterface.writeValve(self.boardID, self._valveID, self._openAngle)
+        self._lastValue = self._openAngle
 
     def close(self):
-        BoardInterface.writeValve(boardID, valveID, closeAngle)
-        _lastValue = closedAngle
+        BoardInterface.writeValve(self.boardID, self._valveID, self._closeAngle)
+        self._lastValue = self._closeAngle
 
-    def getName(self):
-        return name
+    def get_name(self):
+        return self.name
 
-    def getBoardID(self):
-        return boardID
+    def get_board_id(self):
+        return self.boardID
 
-    def getValveID(self):
-        return _valveID
-
-
+    def get_valve_id(self):
+        return self._valveID
 
 class ValveManager:
     """
@@ -58,32 +61,25 @@ class ValveManager:
     def __init__(self):
 
         # Dictionary mapping descriptive labels from the ValveEnum class to the corresponding sensor objects.
-        _valves = {}
+        self._valves = {}
 
         # Maps each board ID (1 thru 5) to a list of all the valves on the corresponding board.
-        _valvesByBoard = {1 : [], 2 : [], 3 :[], 4 : [], 5 : []}
+        self._valvesByBoard = {1 : [], 2 : [], 3 :[], 4 : [], 5 : []}
 
         # Maps a tuple (valve ID, board ID) to the corresponding sensor object.
-        _valvesByID = {}
+        self._valvesByID = {}
 
 
-    def addValve(self, vEnum, vObject):
-        _valves[vEnum] = vObject
-        _valvesByBoard[vObject.getBoardID()].append(vObject)
-        _valvesByID[ (vObject.getValveID(), vObject.getBoardID())] = vObject
+    def add_valve(self, vEnum, vObject):
+        self._valves[vEnum] = vObject
+        self._valvesByBoard[vObject.getBoardID()].append(vObject)
+        self._valvesByID[ (vObject.getValveID(), vObject.getBoardID())] = vObject
 
-    def getValve(self, vEnum):
-        return _valves[vEnum]
+    def get_valve(self, vEnum):
+        return self._valves[vEnum]
 
-    def getValveByID(self, valveID, boardID):
-        return _valvesByID[ (valveID, boardID) ]
+    def get_valve_by_id(self, valveID, boardID):
+        return self._valvesByID[ (valveID, boardID) ]
 
-    def getAllValves(self):
-        return _valves.values()
-
-    class ValveEnum(Enum):
-        """
-        Embedded enumerator class to keep a descriptive label for every valve on the test standself.
-        """
-
-        DEFAULT_VALVE = 1
+    def get_all_valves(self):
+        return self._valves.values()
