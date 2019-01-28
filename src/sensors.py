@@ -55,7 +55,8 @@ class TemperatureSensor(Sensor):
         # Effectively divides by 2^5. Eliminates the last 5 bits and grabs the first 11.
         integer = int(rawValue >> 5)
 
-        # Mod 2^5 grabs the last 5 bits. Take the value as an int, then divide by 32 (because it's after the decimal point)
+        # Mod 2^5 grabs the last 5 bits. Take the value as an int, then divide by 32 
+        # (because it's after the decimal point)
         decimal = float(int(rawValue % (2**5))) / 32.0
 
         return float(integer) + decimal

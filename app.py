@@ -35,13 +35,14 @@ def client_tester():
         # TODO: Add better client test
         # Code to test Client
         send_log_data('Hello World!')
-        send_sensor_data(
-        socketio.emit('sensor_data', {'time': time.time() - start_time,
-                                      'name': 'sensor1',
-                                      'value': i})
-        socketio.emit('sensor_data', {'time': time.time() - start_time,
-                                      'name': 'sensor2',
-                                      'value': i + 1})
+        send_sensor_data(sensor_manager.get_sensor_by_name("Pressure Sensor 1"))
+        send_sensor_data(sensor_manager.get_sensor_by_name("Temperature Sensor 1"))
+        # socketio.emit('sensor_data', {'time': time.time() - start_time,
+        #                               'name': 'sensor1',
+        #                               'value': i})
+        # socketio.emit('sensor_data', {'time': time.time() - start_time,
+        #                               'name': 'sensor2',
+        #                               'value': i + 1})
         i += 1
         socketio.sleep(1);
 
