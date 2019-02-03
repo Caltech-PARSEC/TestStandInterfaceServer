@@ -2,7 +2,9 @@ import can
 can.rc['interface'] = 'socketcan'
 can.rc['channel'] = 'vcan0'
 can.rc['bitrate'] = 500000
-from can.interfaces.interface import ThreadSafeBus
+# from can.interfaces.interface import ThreadSafeBus
+from can import ThreadSafeBus
+# from can.thread_safe_bus import ThreadSafeBus
 
 class CanListener(can.Listener):
     def message_handler(self, boardId, sensorId, data):
