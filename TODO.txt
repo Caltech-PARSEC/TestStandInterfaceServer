@@ -1,5 +1,1 @@
 Figure out configuration -- check environment variables, or just run script and see if it works
-
-Check that linux "Reasonably modern Linux Kernels (2.6.25 or newer) have an implementation of socketcan"
-
-
