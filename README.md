@@ -28,6 +28,11 @@ sudo ip can1 up
 You can then use the `candump` and `cansend` commands, passing 'can1' to `candump`'s
 `<CAN interface>` field and `cansend`'s `<device>` field.
 
+We are using the standard 11-bit long CAN ID (as opposed to the 29-bit extended ID),
+so make sure supplied CAN IDs fit in 11 bits. In python-can, the `is_extended_id`
+attribute of `can.Message` objects control this, so set the corresponding argument
+in the can.Message constructor to false.
+
 ## Beaglebone Hardware Configuration
 To enable the can1 device on the beaglebone, I followed the 
 [instructions](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays)
